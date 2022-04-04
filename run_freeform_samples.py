@@ -65,7 +65,7 @@ def visualise_ocr(data, original_image, language):
     return hconcat(output_image, original_image)
 
 
-def process_file(filename, language, key):
+def process_file(filename, language, key, visualise):
     """
     Process image with DEEPREAD Free Form RapidAPI endpoint outputting visualisation.
     """
@@ -99,9 +99,11 @@ def process_file(filename, language, key):
     with open(json_filename, 'w') as json_file:
         json_file.write(content)
 
-    with Image.open(filename) as original_image:
-        output_image = visualise_ocr(data, original_image, language)
-        output_image.save(os.path.join(OUTPUT_DIR, os.path.basename(filename)))
+    if visualise:
+        print('Creating visualisation for {}'.format(filename))
+        with Image.open(filename) as original_image:
+            output_image = visualise_ocr(data, original_image, language)
+            output_image.save(os.path.join(OUTPUT_DIR, os.path.basename(filename)))
 
 
 if __name__ == '__main__':
@@ -110,6 +112,9 @@ if __name__ == '__main__':
                         help='X-RapidAPI-Key header required to access rapidapi.')
     parser.add_argument('-l', '--language', type=str, default='en',
                         help='ACCEPT-LANGUAGE value passed to rapidapi/deepread.')
+    parser.add_argument('--vis', '--visualise', dest='visualise', action='store_true',
+                        default=False,
+                        help='create visualisation output?')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--file', type=str, help='path the file to process')
     group.add_argument('--all', dest='all', action='store_true',
@@ -119,7 +124,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.file:
-        process_file(args.file, args.language, args.key)
+        process_file(args.file, args.language, args.key, args.visualise)
     else:
         for sample in os.listdir(SAMPLES_DIR):
-            process_file(os.path.join(SAMPLES_DIR, sample), args.language, args.key)
+            process_file(os.path.join(SAMPLES_DIR, sample), args.language, args.key, args.visualise)

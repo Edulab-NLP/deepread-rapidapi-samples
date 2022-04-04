@@ -30,6 +30,8 @@ One of these are required:
 
 Other args:
 
+`--vis`: when selected, a visualisation output will be created.
+
 `-l`|`--language`: ACCEPT-LANGUAGE value passed to rapidapi/deepread. (default `en`)
 
 `-h`|`--help`: output details of command line inputs.
@@ -38,6 +40,9 @@ Usage
 ----------
 To process a specific image:
 `python run_freeform_samples.py -k <X-RapidAPI-Key> -f samples/Test_SC7.png`
+
+To process a specific image with a visualisation output created:
+`python run_freeform_samples.py -k <X-RapidAPI-Key> -f samples/Test_SC7.png --vis`
 
 To process all images in `samples/` folder.
 `python run_freeform_samples.py -k <X-RapidAPI-Key> --all`
@@ -51,7 +56,8 @@ The script outputs are all sent to the `outputs/` folder.
 
 There are two outputs for every image processed:
 
-i. `outputs/<filename>.<image extension>`: a visualisation of the processed images with side-by-side comparison. The visualisation
-places all of the extracted text in the approximate location of the bounding boxes found over a blank image.
+i. `outputs/<filename>.json`: json output returned by DEEPREAD Free Form via RapidAPI.
 
-ii. `outputs/<filename>.json`: json output returned by DEEPREAD Free Form via RapidAPI.
+ii. (optional) `outputs/<filename>.<image extension>`: a visualisation of the processed images with side-by-side
+comparison. The visualisation places all of the extracted text in the approximate location of the bounding boxes found
+over a blank image.
