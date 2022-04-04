@@ -24,7 +24,7 @@ def hconcat(im1, im2):
     return dst
 
 
-def visualise_ocr(data, original_image):
+def visualise_ocr(data, original_image, language):
     """
     Visualise DEEPREAD Free Form response in side-by-side image comparison.
     """
@@ -39,6 +39,10 @@ def visualise_ocr(data, original_image):
 
     editable_image = ImageDraw.Draw(output_image)
 
+    font_file = os.path.join("fonts", "COURIER.ttf")
+    if language == 'ja':
+        font_file = os.path.join("fonts", "Arial Unicode MS.TTF")
+
     for area in data['pages'][0]['areas']:
         for para in area['paragraphs']:
             for line in para['lines']:
@@ -49,12 +53,12 @@ def visualise_ocr(data, original_image):
 
                     bounding_box_size = math.floor((coords['w']))
                     font_size = bounding_box_size
-                    font = ImageFont.truetype("Arial Unicode MS.TTF", font_size)
+                    font = ImageFont.truetype(font_file, font_size)
                     size = font.getsize_multiline(word['text'])[0]
                     while size > bounding_box_size:
                         diff = 20 if size - bounding_box_size > 100 else 1
                         font_size = font_size - diff
-                        font = ImageFont.truetype("Arial Unicode MS.TTF", font_size)
+                        font = ImageFont.truetype(font_file, font_size)
                         size = font.getsize_multiline(word['text'])[0]
 
                     editable_image.text((bbox[0], bbox[1]), word['text'], (0, 0, 0), font=font)
@@ -96,7 +100,7 @@ def process_file(filename, language, key):
         json_file.write(content)
 
     with Image.open(filename) as original_image:
-        output_image = visualise_ocr(data, original_image)
+        output_image = visualise_ocr(data, original_image, language)
         output_image.save(os.path.join(OUTPUT_DIR, os.path.basename(filename)))
 
 
