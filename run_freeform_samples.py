@@ -94,10 +94,7 @@ def visualise_ocr(data, original_image, language):
 
     editable_image = ImageDraw.Draw(output_image)
 
-    font_file = os.path.join("fonts", "COURIER.ttf")
-
-    if language == 'ja':
-        font_file = os.path.join("fonts", "Arial Unicode MS.TTF")
+    font_file = os.path.join("fonts", "NotoSansJP-Regular.otf")
 
     for area in data['pages'][0]['areas']:
         for para in area['paragraphs']:
