@@ -8,6 +8,7 @@ import numpy as np
 import math
 import os
 from PIL import Image, ImageDraw, ImageFont
+from pdf2image import convert_from_path
 
 
 OUTPUT_DIR = 'outputs'
@@ -94,10 +95,7 @@ def visualise_ocr(data, original_image, language):
 
     editable_image = ImageDraw.Draw(output_image)
 
-    font_file = os.path.join("fonts", "COURIER.ttf")
-
-    if language == 'ja':
-        font_file = os.path.join("fonts", "Arial Unicode MS.TTF")
+    font_file = os.path.join("fonts", "NotoSansJP-Regular.otf")
 
     for area in data['pages'][0]['areas']:
         for para in area['paragraphs']:
@@ -109,15 +107,18 @@ def visualise_ocr(data, original_image, language):
                     text = word['text']
                     bbox = [coords['x'], 
                             coords['y']]
-                    
-                    if vertical_text:
-                        bounding_box_size = math.floor((coords['h']))
-                        font = find_font_size(bounding_box_size, text, font_file)
-                        draw_rotated_text(output_image, 90, (bbox[0], bbox[1]), text, (0, 0, 0), font=font)
-                    else:
-                        bounding_box_size = math.floor((coords['w']))
-                        font = find_font_size(bounding_box_size, text, font_file)
-                        editable_image.text((bbox[0], bbox[1]), text, (0, 0, 0), font=font)
+                    try: 
+                        if vertical_text:
+                            bounding_box_size = math.floor((coords['h']))
+                            font = find_font_size(bounding_box_size, text, font_file)
+                            draw_rotated_text(output_image, 90, (bbox[0], bbox[1]), text, (0, 0, 0), font=font)
+                        else:
+                            bounding_box_size = math.floor((coords['w']))
+                            font = find_font_size(bounding_box_size, text, font_file)
+                            editable_image.text((bbox[0], bbox[1]), text, (0, 0, 0), font=font)
+                    except OSError:
+                        print("Could not find font size without error for "+text)
+
     return hconcat(output_image, original_image)
 
 
@@ -157,6 +158,11 @@ def process_file(filename, language, key, visualise):
 
     if visualise:
         print('Creating visualisation for {}'.format(filename))
+        if '.pdf' in filename:
+            pages = convert_from_path(filename, 250, single_file=True)
+            new_filename = filename.replace('.pdf', '.jpg')
+            pages[0].save(new_filename, 'JPEG')
+            filename = new_filename
         with Image.open(filename) as original_image:
             output_image = visualise_ocr(data, original_image, language)
             output_image.save(os.path.join(OUTPUT_DIR, os.path.basename(filename)))
