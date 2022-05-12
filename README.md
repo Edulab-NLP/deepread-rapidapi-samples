@@ -60,4 +60,5 @@ i. `outputs/<filename>.json`: json output returned by DEEPREAD Free Form via Rap
 
 ii. (optional) `outputs/<filename>.<image extension>`: a visualisation of the processed images with side-by-side
 comparison. The visualisation places all of the extracted text in the approximate location of the bounding boxes found
-over a blank image.
+over a blank image. If the image requested for processing is a `pdf` the output visualisation will be created as a
+`jpeg` as it needs to be converted for visualisation.
