@@ -14,6 +14,8 @@ from pdf2image import convert_from_path
 OUTPUT_DIR = 'outputs'
 SAMPLES_DIR = 'samples'
 
+LANGUAGES = ('en', 'ja')
+
 
 def hconcat(im1, im2):
     """
@@ -23,8 +25,6 @@ def hconcat(im1, im2):
     dst.paste(im1, (0, 0))
     dst.paste(im2, (im1.width, 0))
     return dst
-
-
 
 
 def draw_rotated_text(image, angle, xy, text, fill, *args, **kwargs):
@@ -168,11 +168,31 @@ def process_file(filename, language, key, visualise):
             output_image.save(os.path.join(OUTPUT_DIR, os.path.basename(filename)))
 
 
+def find_language(filename, language=None):
+    """
+    Determines language for processing.
+
+    Order of preference:
+    1. Provided via command line --language
+    2. Contained in filename via '<name>-<language>.<ext>'
+    3. Default 'en'
+    """
+    if language:
+        return language
+
+    name = os.path.splitext(os.path.basename(filename))[0]
+    for language in LANGUAGES:
+        if name.endswith(f'-{language}'):
+            return language
+
+    return 'en'
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process files with DeepRead.')
     parser.add_argument('-k', '--key', type=str, required=True,
                         help='X-RapidAPI-Key header required to access rapidapi.')
-    parser.add_argument('-l', '--language', type=str, default='en',
+    parser.add_argument('-l', '--language', type=str, default=None,
                         help='ACCEPT-LANGUAGE value passed to rapidapi/deepread.')
     parser.add_argument('--vis', '--visualise', dest='visualise', action='store_true',
                         default=False,
@@ -186,7 +206,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.file:
-        process_file(args.file, args.language, args.key, args.visualise)
+        process_file(args.file, find_language(args.file, args.language), args.key, args.visualise)
     else:
         for sample in os.listdir(SAMPLES_DIR):
-            process_file(os.path.join(SAMPLES_DIR, sample), args.language, args.key, args.visualise)
+            language = find_language(sample, args.language)
+            process_file(os.path.join(SAMPLES_DIR, sample), language, args.key, args.visualise)
